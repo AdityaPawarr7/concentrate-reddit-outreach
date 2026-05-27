@@ -6,6 +6,7 @@ import json
 import os
 import re
 from dataclasses import dataclass
+from typing import Any
 
 from config import CONCENTRATE_PROFILE, OUTREACH_THRESHOLD, SIGNAL_GROUPS
 from scraper import RedditPost
@@ -76,8 +77,21 @@ def _suggested_angle(text: str, hits: list[str]) -> str:
     return "General — unified LLM access, observability, team governance"
 
 
+def _extract_concentrate_output_text(resp_json: dict[str, Any]) -> str:
+    """
+    Concentrate Responses API returns normalized 'output' with content blocks.
+    We extract concatenated output_text blocks as a single string.
+    """
+    out_parts: list[str] = []
+    for out in resp_json.get("output", []) or []:
+        for c in out.get("content", []) or []:
+            if c.get("type") == "output_text" and isinstance(c.get("text"), str):
+                out_parts.append(c["text"])
+    return "\n".join(p for p in out_parts if p.strip()).strip()
+
+
 def _llm_grade(post: RedditPost, rule_score: int) -> tuple[int, str] | None:
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("CONCENTRATE_API_KEY")
     if not USE_LLM or not api_key:
         return None
 
@@ -86,8 +100,10 @@ def _llm_grade(post: RedditPost, rule_score: int) -> tuple[int, str] | None:
     except ImportError:
         return None
 
-    base_url = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
-    model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    # Concentrate API docs: https://concentrate.ai/docs/api-reference/introduction
+    # Base URL: https://api.concentrate.ai/v1
+    base_url = os.getenv("CONCENTRATE_BASE_URL", "https://api.concentrate.ai/v1").rstrip("/")
+    model = os.getenv("CONCENTRATE_MODEL", "auto")
 
     prompt = f"""You grade Reddit posts for B2B outreach fit for Concentrate.ai.
 
@@ -104,19 +120,23 @@ Return JSON only:
 Score high if the poster has a problem Concentrate solves (multi-provider API, cost, governance, Cursor/Claude Code model access).
 Score low for memes, show-offs, job posts, or unrelated chatter."""
 
+    # Prefer the Responses API for production (recommended by Concentrate docs).
+    # We request JSON output via text.format = {"type":"json_object"}.
     resp = requests.post(
-        f"{base_url}/chat/completions",
+        f"{base_url}/responses",
         headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
         json={
             "model": model,
-            "messages": [{"role": "user", "content": prompt}],
+            "input": prompt,
             "temperature": 0.2,
-            "response_format": {"type": "json_object"},
+            "text": {"format": {"type": "json_object"}},
         },
         timeout=60,
     )
     resp.raise_for_status()
-    content = resp.json()["choices"][0]["message"]["content"]
+    content = _extract_concentrate_output_text(resp.json())
+    if not content:
+        return None
     data = json.loads(content)
     return int(data.get("alignment_score", rule_score)), data.get("rationale", "")
 

@@ -30,7 +30,7 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-Edit `.env` if you want Reddit OAuth, LLM grading, or Google Sheets (all optional).
+Edit `.env` if you want Reddit OAuth, LLM grading via Concentrate, or Google Sheets (all optional).
 
 ## Run
 
@@ -69,17 +69,25 @@ Key columns: `alignment_score`, `outreach_priority`, `permalink`, `suggested_ang
 | 45–69 | medium | Review manually |
 | &lt;45 | low | Usually skip |
 
-Grading is keyword-based by default (gateway, cost, Cursor/Claude Code, guardrails, etc.). Set `USE_LLM_GRADING=true` and `OPENAI_API_KEY` in `.env` for LLM-assisted scores.
+Grading is keyword-based by default (gateway, cost, Cursor/Claude Code, guardrails, etc.). To enable LLM-assisted scores, set `USE_LLM_GRADING=true` and `CONCENTRATE_API_KEY` in `.env`.
 
 ## Optional configuration (`.env`)
 
 | Variable | Purpose |
 |----------|---------|
 | `REDDIT_CLIENT_ID` / `REDDIT_CLIENT_SECRET` | Higher rate limits via [Reddit app](https://www.reddit.com/prefs/apps) |
-| `USE_LLM_GRADING` / `OPENAI_API_KEY` | Blend in LLM alignment score |
+| `USE_LLM_GRADING` / `CONCENTRATE_API_KEY` | Blend in LLM alignment score using Concentrate |
+| `CONCENTRATE_BASE_URL` | Concentrate API base URL (default `https://api.concentrate.ai/v1`) |
+| `CONCENTRATE_MODEL` | Model slug (e.g. `auto`, `gpt-4o-mini`, `anthropic/claude-sonnet-4-6`) |
 | `GOOGLE_SHEETS_ID` / `GOOGLE_SERVICE_ACCOUNT_JSON` | Sync to Google Sheets |
 | `SCRAPE_INTERVAL_MINUTES` | Poll interval (default `5`) |
 | `POSTS_PER_SUBREDDIT` | Posts fetched per sub per run (default `25`) |
+
+## Concentrate API docs
+
+- Base URL + auth: `https://concentrate.ai/docs/api-reference/introduction`
+- Responses endpoint (recommended): `https://concentrate.ai/docs/api-reference/endpoint/create-response`
+- Chat Completions compatibility (beta): `https://concentrate.ai/docs/api-reference/endpoint/chat-completions`
 
 ## macOS background (launchd)
 
