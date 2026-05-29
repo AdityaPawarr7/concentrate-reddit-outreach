@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Concentrate Reddit Outreach</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo-dot"></span>
+      <span class="brand-name">Concentrate</span>
+      <span class="brand-sub">Reddit Outreach</span>
+    </div>
+    <div class="topbar-actions">
+      <span id="jobStatus" class="status-pill">Idle</span>
+      <button id="themeToggle" class="btn btn-ghost" type="button">Dark mode</button>
+      <a class="btn btn-outline" href="/api/export/download">Download Excel</a>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- Left: post list -->
+    <aside class="panel panel-left">
+      <div class="panel-head">
+        <h2>Posts</h2>
+        <div class="toolbar">
+          <select id="sortBy">
+            <option value="time">Newest</option>
+            <option value="grade">Highest grade</option>
+            <option value="scraped">Recently scraped</option>
+          </select>
+          <select id="filterPriority">
+            <option value="all">All</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+      </div>
+      <div class="selection-bar">
+        <label><input type="checkbox" id="selectAll" /> Select all</label>
+        <span id="selectedCount">0 selected</span>
+      </div>
+      <ul id="postList" class="post-list"></ul>
+    </aside>
+
+    <!-- Center: detail -->
+    <section class="panel panel-center">
+      <div id="emptyState" class="empty-state">
+        <h3>Select a post</h3>
+        <p>Click a post on the left to view the thread here and copy a suggested reply for manual posting on Reddit.</p>
+      </div>
+      <article id="postDetail" class="post-detail hidden">
+        <div class="detail-actions-top">
+          <a id="openRedditBtn" class="btn btn-primary open-reddit-btn" target="_blank" rel="noopener noreferrer">
+            Open post on Reddit ↗
+          </a>
+          <span id="detailPermalink" class="permalink-text"></span>
+        </div>
+        <div class="detail-meta">
+          <span id="detailSubreddit" class="tag"></span>
+          <span id="detailScore" class="score-badge"></span>
+          <span id="detailPriority" class="priority-badge"></span>
+        </div>
+        <h1 id="detailTitle"></h1>
+        <p class="byline">u/<span id="detailAuthor"></span> · <span id="detailTime"></span></p>
+        <div id="detailBody" class="post-body"></div>
+        <div class="comment-box">
+          <div class="comment-head">
+            <h3>Suggested reply (manual post)</h3>
+            <button id="regenerateBtn" class="btn btn-ghost" type="button">Regenerate with AI</button>
+          </div>
+          <p class="manual-hint">1. Copy reply → 2. Open post on Reddit → 3. Paste as a comment</p>
+          <textarea id="replyText" rows="6" placeholder="Edit your reply, then copy and paste on Reddit..."></textarea>
+          <div class="comment-actions">
+            <button id="copyReplyBtn" class="btn btn-primary" type="button">Copy reply</button>
+            <button id="openRedditBtn2" class="btn btn-outline" type="button">Open on Reddit</button>
+            <button id="saveReplyBtn" class="btn btn-outline" type="button">Save draft</button>
+          </div>
+          <p id="copyStatus" class="copy-status" aria-live="polite"></p>
+          <p id="detailRationale" class="rationale"></p>
+        </div>
+      </article>
+    </section>
+
+    <!-- Right: controls -->
+    <aside class="panel panel-right">
+      <h2>Controls</h2>
+
+      <div class="control-group">
+        <button id="runScraperBtn" class="btn btn-primary block">Run scraper (all)</button>
+        <button id="runGraderAllBtn" class="btn btn-outline block">Run grader (all)</button>
+        <button id="runGraderSelectedBtn" class="btn btn-outline block">Run grader (selected)</button>
+      </div>
+
+      <div class="control-group">
+        <label class="toggle">
+          <input type="checkbox" id="autoScrape" />
+          Auto-scrape every <input type="number" id="scrapeInterval" min="1" max="60" value="5" /> min
+        </label>
+      </div>
+
+      <div class="control-group">
+        <h3>Subreddits</h3>
+        <ul id="subredditList" class="sub-list"></ul>
+        <div class="sub-add">
+          <input id="newSubreddit" type="text" placeholder="Add subreddit" />
+          <button id="addSubBtn" class="btn btn-ghost" type="button">Add</button>
+        </div>
+        <button id="saveSubsBtn" class="btn btn-outline block">Save subreddits</button>
+      </div>
+
+      <div class="control-group">
+        <h3>Grading prompt</h3>
+        <textarea id="gradingPrompt" rows="8"></textarea>
+        <button id="saveGradingPromptBtn" class="btn btn-outline block">Save grading prompt</button>
+      </div>
+
+      <div class="control-group">
+        <h3>Comment prompt</h3>
+        <textarea id="commentPrompt" rows="6"></textarea>
+        <button id="saveCommentPromptBtn" class="btn btn-outline block">Save comment prompt</button>
+      </div>
+    </aside>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
