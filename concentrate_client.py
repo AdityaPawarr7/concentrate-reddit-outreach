@@ -35,7 +35,7 @@ def call_concentrate(
     json_schema: dict[str, Any] | None = None,
     json_object: bool = False,
 ) -> str:
-    api_key = env("CONCENTRATE_API_KEY")
+    api_key = env("CONCENTRATE_API_KEY_REDDIT_SCRAPER")
     if not api_key:
         return ""
     base_url = env("CONCENTRATE_BASE_URL", "https://api.concentrate.ai/v1").rstrip("/")
